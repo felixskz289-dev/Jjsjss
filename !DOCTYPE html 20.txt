@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>你好! Интерактивный урок китайского · HSK 1–2</title>
+<style>
+:root{
+  --red:#d0342c; --red-d:#a8231c; --peach:#ffe9d6; --peach2:#ffd9b8;
+  --ink:#2b2320; --paper:#fffaf4; --ok:#2e9e5b; --bad:#d0342c; --gold:#e8a33d;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:"Segoe UI",system-ui,-apple-system,sans-serif;background:var(--paper);color:var(--ink);min-height:100vh}
+header{background:linear-gradient(135deg,var(--red),var(--red-d));color:#fff;padding:18px 20px;position:sticky;top:0;z-index:50;box-shadow:0 2px 12px rgba(0,0,0,.25)}
+header h1{font-size:1.25rem;letter-spacing:.5px}
+header .sub{opacity:.85;font-size:.8rem;margin-top:2px}
+.progress-wrap{margin-top:10px;background:rgba(255,255,255,.25);border-radius:99px;height:10px;overflow:hidden}
+.progress-bar{height:100%;width:0%;background:linear-gradient(90deg,#ffd9b8,var(--gold));border-radius:99px;transition:width .5s}
+nav{display:flex;gap:6px;padding:10px 12px;background:#fff;position:sticky;top:76px;z-index:40;overflow-x:auto;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.tab{flex:1;min-width:88px;padding:10px 6px;border:none;border-radius:12px;background:var(--peach);color:var(--red-d);font-weight:700;font-size:.85rem;cursor:pointer;transition:.2s;white-space:nowrap}
+.tab.active{background:var(--red);color:#fff;transform:translateY(-2px);box-shadow:0 4px 10px rgba(208,52,44,.35)}
+main{max-width:920px;margin:0 auto;padding:20px 14px 90px}
+.page{display:none;animation:fade .35s}
+.page.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+h2.section{font-size:1.1rem;color:var(--red-d);margin:14px 0 4px;display:flex;align-items:center;gap:8px}
+p.hint{color:#8a7a6f;font-size:.85rem;margin-bottom:14px}
+/* карточки-сетка */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.vcard{background:#fff;border:2px solid var(--peach2);border-radius:16px;padding:14px 8px;text-align:center;cursor:pointer;transition:.2s;position:relative}
+.vcard:hover{transform:translateY(-4px);box-shadow:0 8px 18px rgba(208,52,44,.15);border-color:var(--red)}
+.vcard .hz{font-size:2.2rem;font-weight:600;line-height:1.2}
+.vcard .py{color:var(--red);font-size:.9rem;margin-top:4px}
+.vcard .tr{font-size:.8rem;color:#8a7a6f;margin-top:2px}
+.vcard .spk{position:absolute;top:6px;right:8px;border:none;background:none;font-size:1rem;cursor:pointer;opacity:.6}
+.vcard.learned{border-color:var(--ok)}
+.vcard.learned::after{content:"✓";position:absolute;top:4px;left:8px;color:var(--ok);font-weight:800}
+/* флешкарточка */
+.flash-zone{display:flex;flex-direction:column;align-items:center;gap:16px}
+.flashcard{width:min(340px,90vw);height:230px;perspective:1000px;cursor:pointer}
+.fc-inner{position:relative;width:100%;height:100%;transition:transform .55s;transform-style:preserve-3d}
+.flashcard.flipped .fc-inner{transform:rotateY(180deg)}
+.fc-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;box-shadow:0 10px 26px rgba(0,0,0,.14)}
+.fc-front{background:#fff;border:3px solid var(--peach2)}
+.fc-front .hz{font-size:4.6rem;font-weight:600}
+.fc-front .tip{font-size:.75rem;color:#b09a89}
+.fc-back{background:linear-gradient(135deg,var(--red),var(--red-d));color:#fff;transform:rotateY(180deg)}
+.fc-back .py{font-size:2rem;font-weight:700}
+.fc-back .tr{font-size:1.2rem;opacity:.92}
+.fc-back .ex{font-size:.85rem;opacity:.8;margin-top:6px}
+.fc-controls{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.btn{padding:12px 22px;border:none;border-radius:14px;font-weight:700;font-size:.95rem;cursor:pointer;transition:.15s}
+.btn:active{transform:scale(.95)}
+.btn-red{background:var(--red);color:#fff;box-shadow:0 4px 12px rgba(208,52,44,.3)}
+.btn-ghost{background:var(--peach);color:var(--red-d)}
+.btn-ok{background:var(--ok);color:#fff}
+.counter{font-size:.85rem;color:#8a7a6f}
+/* тесты */
+.quiz-box{background:#fff;border-radius:18px;border:2px solid var(--peach2);padding:20px;margin-top:14px}
+.quiz-q{font-size:1.6rem;text-align:center;margin:8px 0 18px;font-weight:600}
+.quiz-q small{display:block;font-size:.8rem;color:#8a7a6f;font-weight:400;margin-top:4px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{padding:14px;border:2px solid var(--peach2);border-radius:12px;background:var(--paper);font-size:1.05rem;cursor:pointer;transition:.15s;text-align:center}
+.opt:hover{border-color:var(--red)}
+.opt.correct{background:#e3f6ea;border-color:var(--ok);color:var(--ok);font-weight:700}
+.opt.wrong{background:#fdeaea;border-color:var(--bad);color:var(--bad)}
+.quiz-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:.85rem;color:#8a7a6f}
+.score-pill{background:var(--peach);border-radius:99px;padding:4px 14px;font-weight:700;color:var(--red-d)}
+/* диалоги */
+.dlg-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.dlg-tab{padding:8px 16px;border-radius:99px;border:2px solid var(--peach2);background:#fff;cursor:pointer;font-weight:700;font-size:.85rem;color:var(--red-d)}
+.dlg-tab.active{background:var(--red);color:#fff;border-color:var(--red)}
+.chat{background:#fff;border-radius:20px;border:2px solid var(--peach2);padding:18px;display:flex;flex-direction:column;gap:12px}
+.bubble{max-width:82%;padding:12px 16px;border-radius:16px;position:relative;animation:fade .3s}
+.bubble .who{font-size:.7rem;font-weight:700;opacity:.7;margin-bottom:3px}
+.bubble .hz{font-size:1.5rem;font-weight:600}
+.bubble .py{color:var(--red);font-size:.85rem}
+.bubble .tr{font-size:.8rem;opacity:.75;margin-top:2px}
+.bubble.left{background:var(--peach);align-self:flex-start;border-bottom-left-radius:4px}
+.bubble.right{background:#fdeceb;align-self:flex-end;border-bottom-right-radius:4px}
+.bubble.user-role{outline:3px dashed var(--gold);cursor:pointer;min-width:180px}
+.bubble .hidden-ans{filter:blur(9px);user-select:none;transition:filter .4s}
+.bubble.revealed .hidden-ans{filter:none}
+.bubble .tap{font-size:.7rem;color:var(--gold);font-weight:700;margin-top:4px}
+.dlg-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+/* письмо */
+.write-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.write-card{background:#fff;border:2px solid var(--peach2);border-radius:16px;padding:14px;text-align:center}
+.write-card canvas{background:repeating-linear-gradient(#fff,#fff 63px,#ffe3c8 64px);border-radius:10px;touch-action:none;cursor:crosshair;width:100%}
+.write-card .hz{font-size:2.6rem;margin-bottom:6px}
+.write-card .py{font-size:.85rem;color:var(--red);margin-bottom:8px}
+.write-card .row{display:flex;gap:8px;justify-content:center;margin-top:8px}
+.mini-btn{padding:7px 14px;font-size:.8rem;border-radius:10px;border:none;cursor:pointer;font-weight:700}
+.mini-play{background:var(--peach);color:var(--red-d)}
+.mini-clear{background:#f1ece7;color:#8a7a6f}
+.model-toggle{display:flex;align-items:center;gap:10px;margin-bottom:16px;background:#fff;padding:12px 16px;border-radius:14px;border:2px solid var(--peach2);font-size:.9rem}
+.model-toggle input{width:20px;height:20px;accent-color:var(--red)}
+footer{text-align:center;padding:20px;color:#b09a89;font-size:.78rem}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:12px 24px;border-radius:99px;font-weight:700;transition:transform .35s;z-index:99;opacity:.95}
+.toast.show{transform:translateX(-50%) translateY(0)}
+@media(max-width:520px){.opts{grid-template-columns:1fr}.fc-front .hz{font-size:3.4rem}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>你好! · Интерактивный урок китайского</h1>
+  <div class="sub">Урок 1–2 · Приветствие и знакомство · 新 HSK 教程 1+2</div>
+  <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+</header>
+
+<nav>
+  <button class="tab active" data-page="vocab">📚 Слова</button>
+  <button class="tab" data-page="flash">🃏 Карточки</button>
+  <button class="tab" data-page="quiz">✏️ Тест</button>
+  <button class="tab" data-page="dialog">💬 Диалоги</button>
+  <button class="tab" data-page="write">🖌️ Письмо</button>
+</nav>
+
+<main>
+
+<!-- СЛОВА -->
+<section class="page active" id="page-vocab">
+  <h2 class="section">📚 Новые слова <span style="font-size:.8rem;color:#b09a89">生词</span></h2>
+  <p class="hint">Нажми на карточку, чтобы услышать произношение. Долгое нажатие (или кнопка ✓) — отметить как выученное.</p>
+  <div class="grid" id="vocabGrid"></div>
+</section>
+
+<!-- ФЛЕШКАРТОЧКИ -->
+<section class="page" id="page-flash">
+  <h2 class="section">🃏 Флешкарточки</h2>
+  <p class="hint">Нажми на карточку, чтобы перевернуть. Проверь себя до переворота!</p>
+  <div class="flash-zone">
+    <div class="counter" id="flashCounter"></div>
+    <div class="flashcard" id="flashcard">
+      <div class="fc-inner">
+        <div class="fc-face fc-front">
+          <div class="hz" id="fcHz">你好</div>
+          <div class="tip">нажми, чтобы перевернуть</div>
+        </div>
+        <div class="fc-face fc-back">
+          <div class="py" id="fcPy"></div>
+          <div class="tr" id="fcTr"></div>
+          <div class="ex" id="fcEx"></div>
+        </div>
+      </div>
+    </div>
+    <div class="fc-controls">
+      <button class="btn btn-ghost" id="btnPrev">← Назад</button>
+      <button class="btn btn-red" id="btnFlip">Перевернуть</button>
+      <button class="btn btn-ghost" id="btnNext">Далее →</button>
+    </div>
+    <div class="fc-controls">
+      <button class="btn btn-ghost" id="btnSound">🔊 Озвучить</button>
+      <button class="btn btn-ok" id="btnKnown">✓ Знаю это слово</button>
+      <button class="btn btn-ghost" id="btnShuffle">🔀 Перемешать</button>
+    </div>
+  </div>
+</section>
+
+<!-- ТЕСТ -->
+<section class="page" id="page-quiz">
+  <h2 class="section">✏️ Тест</h2>
+  <p class="hint">Выбери режим и отвечай. За правильный ответ — очки!</p>
+  <div class="dlg-tabs" id="quizModes">
+    <button class="dlg-tab active" data-mode="hz2tr">Иероглиф → перевод</button>
+    <button class="dlg-tab" data-mode="tr2hz">Перевод → иероглиф</button>
+    <button class="dlg-tab" data-mode="py2hz">Пиньинь → иероглиф</button>
+  </div>
+  <div class="quiz-box">
+    <div class="quiz-meta">
+      <span id="quizStep">Вопрос 1</span>
+      <span class="score-pill" id="quizScore">⭐ 0</span>
+    </div>
+    <div class="quiz-q" id="quizQ"></div>
+    <div class="opts" id="quizOpts"></div>
+  </div>
+</section>
+
+<!-- ДИАЛОГИ -->
+<section class="page" id="page-dialog">
+  <h2 class="section">💬 Диалоги</h2>
+  <p class="hint">Читай вслух за одного из героев. Реплики с пунктирной рамкой — твоя роль: попробуй вспомнить, затем нажми, чтобы проверить.</p>
+  <div class="dlg-tabs" id="dlgTabs"></div>
+  <div class="chat" id="chat"></div>
+  <div class="dlg-actions">
+    <button class="btn btn-red" id="btnPlayAll">▶ Прослушать весь диалог</button>
+    <button class="btn btn-ghost" id="btnRevealAll">Показать/скрыть все ответы</button>
+  </div>
+</section>
+
+<!-- ПИСЬМО -->
+<section class="page" id="page-write">
+  <h2 class="section">🖌️ Тренажёр письма</h2>
+  <p class="hint">Пиши иероглиф по образцу на поле сетки. Проверь себя: нажми «Скрыть образец» и напиши по памяти.</p>
+  <label class="model-toggle"><input type="checkbox" id="modelToggle" checked> Показывать образец иероглифа под сеткой</label>
+  <div class="write-grid" id="writeGrid"></div>
+</section>
+
+</main>
+
+<footer>Сделано для отработки уроков 1–2 · 新 HSK 教程 · 王老师 и 小语 одобряют 👍</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ ДАННЫЕ ============ */
+const VOCAB = [
+ {hz:"你好",py:"nǐ hǎo",tr:"привет; здравствуйте",ex:"你好，小语！"},
+ {hz:"大家",py:"dàjiā",tr:"все; everybody",ex:"大家好！"},
+ {hz:"好",py:"hǎo",tr:"хороший; good",ex:"很好！"},
+ {hz:"学生",py:"xúesheng",tr:"студент; ученик",ex:"学生们 — ученики"},
+ {hz:"们",py:"men",tr:"суффикс множ. числа",ex:"我们, 你们, 学生们"},
+ {hz:"老师",py:"lǎoshī",tr:"учитель",ex:"王老师 — учитель Ван"},
+ {hz:"您",py:"nín",tr:"Вы (вежливо)",ex:"老师，您好！"},
+ {hz:"你们",py:"nǐmen",tr:"вы (мн.ч.)",ex:"你们好！"},
+ {hz:"谢谢",py:"xièxie",tr:"спасибо",ex:"谢谢老师！"},
+ {hz:"不客气",py:"bú kèqi",tr:"не за что; пожалуйста",ex:"— 谢谢！— 不客气！"},
+ {hz:"同学",py:"tóngxué",tr:"одноклассник",ex:"同学们，再见！"},
+ {hz:"再见",py:"zàijiàn",tr:"до свидания",ex:"老师，再见！"},
+ {hz:"请问",py:"qǐngwèn",tr:"скажите, пожалуйста (excuse me)",ex:"请问，你叫什么名字？"},
+ {hz:"你",py:"nǐ",tr:"ты; вы",ex:"你好！"},
+ {hz:"叫",py:"jiào",tr:"называться; звать",ex:"你叫什么？"},
+ {hz:"什么",py:"shénme",tr:"что; какой",ex:"什么意思？"},
+ {hz:"名字",py:"míngzi",tr:"имя",ex:"我叫陈天中。"},
+ {hz:"我",py:"wǒ",tr:"я; меня",ex:"我叫王一飞。"},
+ {hz:"王老师",py:"Wáng lǎoshī",tr:"учитель Ван (proper noun)",ex:"王老师，你好！"}
+];
+
+const DIALOGS = [
+ {title:"1️⃣ AI小语，你好!",lines:[
+   {who:"Wang Yifei · 王一飞",hz:"AI小语，你好！",py:"AI Xiǎoyǔ, nǐ hǎo!",tr:"AI Сяоюй, привет!"},
+   {who:"Xiaoyu · 小语",hz:"王老师，你好！",py:"Wáng lǎoshī, nǐ hǎo!",tr:"Учитель Ван, привет!"}
+ ]},
+ {title:"2️⃣ 大家好!",lines:[
+   {who:"Wang Yifei · 王一飞",hz:"大家好！",py:"Dàjiā hǎo!",tr:"Всем привет!"},
+   {who:"Students · 学生们",hz:"老师，您好！",py:"Lǎoshī, nín hǎo!",tr:"Учитель, здравствуйте! (вежл.)"},
+   {who:"Xiaoyu · 小语",hz:"你们好！",py:"Nǐmen hǎo!",tr:"Привет всем! (вы, мн.ч.)"},
+   {who:"Students · 学生们",hz:"你好，小语！",py:"Nǐ hǎo, Xiǎoyǔ!",tr:"Привет, Сяоюй!"}
+ ]},
+ {title:"3️⃣ 谢谢! 再见!",lines:[
+   {who:"Students · 学生们",hz:"谢谢！",py:"Xièxie!",tr:"Спасибо!"},
+   {who:"Xiaoyu · 小语",hz:"不客气！",py:"Bú kèqi!",tr:"Не за что!"},
+   {who:"Wang Yifei · 王一飞",hz:"同学们，再见！",py:"Tóngxuémen, zàijiàn!",tr:"Одноклассники, до свидания!"},
+   {who:"Students · 学生们",hz:"老师，再见！",py:"Lǎoshī, zàijiàn!",tr:"Учитель, до свидания!"}
+ ]},
+ {title:"4️⃣ 请问，你叫什么名字?",lines:[
+   {who:"Wang Yifei · 王一飞",hz:"请问，你叫什么名字？",py:"Qǐngwèn, nǐ jiào shénme míngzi?",tr:"Скажите, пожалуйста, как вас зовут?"},
+   {who:"Chen Tianzhong · 陈天中",hz:"我叫陈天中。",py:"Wǒ jiào Chén Tiānzhōng.",tr:"Меня зовут Чэнь Тяньчжун."}
+ ]}
+];
+
+/* ============ УТИЛИТЫ ============ */
+const $=s=>document.querySelector(s);
+function speak(text){
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang="zh-CN"; u.rate=0.8;
+    const v=speechSynthesis.getVoices().find(v=>v.lang&&v.lang.startsWith("zh"));
+    if(v)u.voice=v;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+speechSynthesis.onvoiceschanged=()=>{};
+let toastTimer;
+function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("show"),1800);}
+
+/* выученные слова */
+let learned=new Set(JSON.parse(localStorage.getItem("hsk_learned")||"[]"));
+function saveLearned(){localStorage.setItem("hsk_learned",JSON.stringify([...learned]));updateProgress();}
+function updateProgress(){
+  const p=Math.round(learned.size/VOCAB.length*100);
+  $("#progressBar").style.width=p+"%";
+}
+
+/* ============ НАВИГАЦИЯ ============ */
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active");
+  $("#page-"+b.dataset.page).classList.add("active");
+  window.scrollTo({top:0,behavior:"smooth"});
+}));
+
+/* ============ СЕТКА СЛОВ ============ */
+function renderVocab(){
+  const g=$("#vocabGrid");g.innerHTML="";
+  VOCAB.forEach((w,i)=>{
+    const c=document.createElement("div");
+    c.className="vcard"+(learned.has(w.hz)?" learned":"");
+    c.innerHTML=`<button class="spk" title="Озвучить">🔊</button>
+      <div class="hz">${w.hz}</div><div class="py">${w.py}</div><div class="tr">${w.tr}</div>`;
+    c.addEventListener("click",()=>speak(w.hz.replace(/[A-Za-z ]/g,"")));
+    c.addEventListener("contextmenu",e=>{e.preventDefault();toggleLearned(w.hz);});
+    let pressT;
+    c.addEventListener("touchstart",()=>{pressT=setTimeout(()=>toggleLearned(w.hz),600);},{passive:true});
+    c.addEventListener("touchend",()=>clearTimeout(pressT));
+    g.appendChild(c);
+  });
+}
+function toggleLearned(hz){
+  learned.has(hz)?learned.delete(hz):learned.add(hz);
+  saveLearned();renderVocab();
+  toast(learned.has(hz)?"Отмечено как выученное ✓":"Снято отметку");
+}
+
+/* ============ ФЛЕШКАРТОЧКИ ============ */
+let fOrder=VOCAB.map((_,i)=>i), fPos=0;
+function showFlash(){
+  const w=VOCAB[fOrder[fPos]];
+  $("#flashcard").classList.remove("flipped");
+  setTimeout(()=>{
+    $("#fcHz").textContent=w.hz;
+    $("#fcPy").textContent=w.py;
+    $("#fcTr").textContent=w.tr;
+    $("#fcEx").textContent="例: "+w.ex;
+  },$("#flashcard").classList.contains("flipped")?0:150);
+  $("#fcHz").textContent=w.hz;$("#fcPy").textContent=w.py;$("#fcTr").textContent=w.tr;$("#fcEx").textContent="例: "+w.ex;
+  $("#flashCounter").textContent=`Карточка ${fPos+1} из ${fOrder.length}`+ (learned.has(w.hz)?" · ✓ знаю":"");
+  $("#btnKnown").textContent=learned.has(w.hz)?"✓ Выучено!":"Знаю это слово";
+}
+$("#flashcard").addEventListener("click",()=>$("#flashcard").classList.toggle("flipped"));
+$("#btnFlip").addEventListener("click",()=>$("#flashcard").classList.toggle("flipped"));
+$("#btnNext").addEventListener("click",()=>{fPos=(fPos+1)%fOrder.length;showFlash();});
+$("#btnPrev").addEventListener("click",()=>{fPos=(fPos-1+fOrder.length)%fOrder.length;showFlash();});
+$("#btnSound").addEventListener("click",()=>speak(VOCAB[fOrder[fPos]].hz.replace(/[A-Za-z ]/g,"")));
+$("#btnKnown").addEventListener("click",()=>{toggleLearned(VOCAB[fOrder[fPos]].hz);showFlash();});
+$("#btnShuffle").addEventListener("click",()=>{fOrder=fOrder.sort(()=>Math.random()-.5);fPos=0;showFlash();toast("Перемешано 🔀");});
+
+/* ============ ТЕСТ ============ */
+let qMode="hz2tr",qCount=0,qScore=0,qCurrent=null,qLocked=false;
+function pick(arr,n,exclude){
+  const pool=arr.filter(x=>!exclude.includes(x));
+  const out=[];
+  while(out.length<n&&pool.length){out.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]);}
+  return out;
+}
+function newQuestion(){
+  qLocked=false;qCount++;
+  $("#quizStep").textContent="Вопрос "+qCount;
+  $("#quizScore").textContent="⭐ "+qScore;
+  const correct=VOCAB[Math.floor(Math.random()*VOCAB.length)];
+  qCurrent=correct;
+  const others=pick(VOCAB,3,[correct.hz]);
+  const opts=[correct,...others].sort(()=>Math.random()-.5);
+  let qHtml, optHtmls;
+  if(qMode==="hz2tr"){
+    qHtml=`<span style="font-size:2.4rem">${correct.hz}</span><small>${correct.py} — выбери перевод</small>`;
+    optHtmls=opts.map(o=>({key:o.hz,html:`<div style="font-size:1rem">${o.tr}</div>`}));
+  }else if(qMode==="tr2hz"){
+    qHtml=`«${correct.tr}»<small>выбери правильный иероглиф</small>`;
+    optHtmls=opts.map(o=>({key:o.hz,html:`<div style="font-size:1.9rem;font-weight:600">${o.hz}</div><div style="font-size:.7rem;color:#8a7a6f">${o.py}</div>`}));
+  }else{
+    qHtml=`<span style="font-size:2.2rem;color:var(--red)">${correct.py}</span><small>выбери иероглиф</small>`;
+    optHtmls=opts.map(o=>({key:o.hz,html:`<div style="font-size:1.9rem;font-weight:600">${o.hz}</div>`}));
+  }
+  $("#quizQ").innerHTML=qHtml;
+  const box=$("#quizOpts");box.innerHTML="";
+  optHtmls.forEach(o=>{
+    const d=document.createElement("div");
+    d.className="opt";d.innerHTML=o.html;d.dataset.key=o.key;
+    d.addEventListener("click",()=>answer(d,o.key));
+    box.appendChild(d);
+  });
+}
+function answer(el,key){
+  if(qLocked)return;qLocked=true;
+  if(key===qCurrent.hz){
+    el.classList.add("correct");qScore++;
+    speak(qCurrent.hz.replace(/[A-Za-z ]/g,""));
+    toast("Правильно! +1 ⭐");
+  }else{
+    el.classList.add("wrong");
+    document.querySelectorAll(".opt").forEach(o=>{if(o.dataset.key===qCurrent.hz)o.classList.add("correct");});
+    toast("Не совсем… Правильно: "+qCurrent.hz);
+  }
+  $("#quizScore").textContent="⭐ "+qScore;
+  setTimeout(newQuestion,1400);
+}
+document.querySelectorAll("#quizModes .dlg-tab").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll("#quizModes .dlg-tab").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active");qMode=b.dataset.mode;qScore=0;qCount=0;newQuestion();
+}));
+
+/* ============ ДИАЛОГИ ============ */
+let curDlg=0, allRevealed=false;
+function renderDlgTabs(){
+  const t=$("#dlgTabs");t.innerHTML="";
+  DIALOGS.forEach((d,i)=>{
+    const b=document.createElement("button");
+    b.className="dlg-tab"+(i===curDlg?" active":"");b.textContent=d.title;
+    b.addEventListener("click",()=>{curDlg=i;allRevealed=false;renderDlgTabs();renderChat();});
+    t.appendChild(b);
+  });
+}
+function renderChat(){
+  const c=$("#chat");c.innerHTML="";
+  DIALOGS[curDlg].lines.forEach((l,i)=>{
+    const side=i%2===0?"left":"right";
+    const b=document.createElement("div");
+    b.className=`bubble ${side} user-role${allRevealed?" revealed":""}`;
+    b.innerHTML=`<div class="who">${l.who}</div>
+      <div class="hidden-ans">
+        <div class="hz">${l.hz}</div><div class="py">${l.py}</div><div class="tr">${l.tr}</div>
+      </div>
+      <div class="tap">👆 нажми, чтобы проверить</div>`;
+    b.addEventListener("click",()=>{b.classList.toggle("revealed");speak(l.hz.replace(/[A-Za-z ]/g,""));});
+    c.appendChild(b);
+  });
+}
+$("#btnRevealAll").addEventListener("click",()=>{allRevealed=!allRevealed;renderChat();});
+$("#btnPlayAll").addEventListener("click",()=>{
+  speechSynthesis.cancel();
+  DIALOGS[curDlg].lines.forEach((l,i)=>{
+    setTimeout(()=>speak(l.hz.replace(/[A-Za-z ]/g,"")),i*2200);
+  });
+});
+
+/* ============ ПИСЬМО ============ */
+function renderWrite(){
+  const g=$("#writeGrid");g.innerHTML="";
+  VOCAB.slice(0,18).forEach(w=>{
+    const card=document.createElement("div");card.className="write-card";
+    card.innerHTML=`<div class="hz">${w.hz}</div><div class="py">${w.py} · ${w.tr}</div>
+      <canvas width="240" height="240"></canvas>
+      <div class="row">
+        <button class="mini-btn mini-play">🔊 Слушать</button>
+        <button class="mini-btn mini-clear">Очистить</button>
+      </div>`;
+    const cv=card.querySelector("canvas"),ctx=cv.getContext("2d");
+    // сетка тян
+    ctx.strokeStyle="#ffd9b8";ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(120,0);ctx.lineTo(120,240);ctx.moveTo(0,120);ctx.lineTo(240,120);ctx.stroke();
+    // образец
+    const model=document.createElement("div");
+    function drawModel(){
+      ctx.clearRect(0,0,240,240);
+      ctx.strokeStyle="#ffd9b8";ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(120,0);ctx.lineTo(120,240);ctx.moveTo(0,120);ctx.lineTo(240,120);ctx.stroke();
+      if($("#modelToggle").checked){
+        ctx.font="200px 'Kaiti SC','STKaiti','KaiTi',serif";
+        ctx.fillStyle="rgba(208,52,44,.15)";
+        ctx.textAlign="center";ctx.textBaseline="middle";
+        ctx.fillText(w.hz.length>2?w.hz[0]:w.hz,120,130);
+      }
+    }
+    drawModel();
+    $("#modelToggle").addEventListener("change",drawModel);
+    ctx.lineWidth=5;ctx.lineCap="round";ctx.lineJoin="round";ctx.strokeStyle="#2b2320";
+    let drawing=false;
+    function pos(e){const r=cv.getBoundingClientRect();const t=e.touches?e.touches[0]:e;
+      return{x:(t.clientX-r.left)*(240/r.width),y:(t.clientY-r.top)*(240/r.height)};}
+    function start(e){e.preventDefault();drawing=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);}
+    function move(e){if(!drawing)return;e.preventDefault();const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();}
+    function end(){drawing=false;}
+    cv.addEventListener("mousedown",start);cv.addEventListener("mousemove",move);
+    window.addEventListener("mouseup",end);
+    cv.addEventListener("touchstart",start,{passive:false});
+    cv.addEventListener("touchmove",move,{passive:false});
+    cv.addEventListener("touchend",end);
+    card.querySelector(".mini-play").addEventListener("click",()=>speak(w.hz.replace(/[A-Za-z ]/g,"")));
+    card.querySelector(".mini-clear").addEventListener("click",drawModel);
+    g.appendChild(card);
+  });
+}
+
+/* ============ INIT ============ */
+renderVocab();showFlash();newQuestion();renderDlgTabs();renderChat();renderWrite();updateProgress();
+</script>
+</body>
+</html>
